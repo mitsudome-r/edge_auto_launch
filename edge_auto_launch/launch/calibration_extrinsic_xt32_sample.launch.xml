@@ -2,12 +2,12 @@
   <!-- arguments -->
   <arg name="camera_name"/>
   <arg name="vehicle_id" default="$(env VEHICLE_ID default)"/>
-  <arg name="live_sensor" default="True"/>
+  <arg name="live_sensor" default="False"/>
 
   <!-- variables -->
   <let name="lidar_model" value="pandar_xt32"/>
-  <let name="lidar_frame" value="lidar"/>
-  <let name="compressed_image_topic" value="/sensing/camera/$(var camera_name)/image_raw/compressed"/>
+  <let name="lidar_frame" value="hesai_top"/>
+  <let name="compressed_image_topic" value="/sensing/camera/camera4/image_rect_color/compressed"/>
   <let name="camera_info_topic" value="/sensing/camera/$(var camera_name)/camera_info"/>
   <let name="pointcloud_topic" value="/sensing/lidar/xt32/aw_points"/>
   <let name="camera_frame" value="$(var camera_name)/camera_link"/>
@@ -15,6 +15,7 @@
   <let name="rviz_profile" value=""/>
   <let name="rviz_profile" value="$(find-pkg-share edge_auto_launch)/config/visualization/calibration_extrinsic_at128_camera0.rviz" if="$(eval &quot;'$(var camera_name)' == 'camera0' &quot;)"/>
   <let name="rviz_profile" value="$(find-pkg-share edge_auto_launch)/config/visualization/calibration_extrinsic_at128_camera1.rviz" if="$(eval &quot;'$(var camera_name)' == 'camera1' &quot;)"/>
+  <let name="rviz_profile" value="$(find-pkg-share edge_auto_launch)/config/visualization/calibration_extrinsic_xt32_camera4.rviz" if="$(eval &quot;'$(var camera_name)' == 'camera4' &quot;)"/>
 
   <!-- driver -->
   <group>
@@ -24,6 +25,17 @@
       <arg name="live_sensor" value="$(var live_sensor)"/>
     </include>
   </group>
+
+  <include file="$(find-pkg-share global_parameter_loader)/launch/set_use_sim_time.launch.py">
+    <arg name="use_sim_time" value="false"/>
+    <!-- <arg name="vehicle_model" value="$(var vehicle_model)"/> -->
+  </include>
+
+  <!-- <node pkg="timestamp_overwrite" exec="overwrite_header" name="lidar_timestamp_overwrite">
+    <remap from="~/input" to="/sensing/lidar/top/pointcloud_raw"/>
+    <remap from="~/output" to="/sensing/lidar/top/pointcloud_raw_fixed"/>
+    <param name="frame_id" value="hesai_top"/>
+  </node> -->
 
   <!-- calibrator -->
   <group>
@@ -55,13 +67,6 @@
     </node>
     <include file="$(find-pkg-share intrinsic_camera_calibration)/launch/optimizer.launch.xml"/>
   </group>
-
-  <!-- comment: this tf broadcast should be done elsewhere-->
-  <node pkg="tf2_ros" exec="static_transform_publisher" name="estimated_base_link_broadcaster" output="screen" args="--x 0.0 --y 0.0 --z 0.0 --qx 0.5 --qy -0.5 --qz 0.5 --qw -0.5 --frame-id base_link --child-frame-id lidar" />
-  <node pkg="tf2_ros" exec="static_transform_publisher" name="estimated_base_link_broadcaster" output="screen" args="--x 0.0 --y 0.0 --z 0.0 --qx 0.5 --qy -0.5 --qz 0.5 --qw -0.5 --frame-id camera0/camera_link --child-frame-id camera0/camera_optical_link" />
-  <node pkg="tf2_ros" exec="static_transform_publisher" name="estimated_base_link_broadcaster" output="screen" args="--x 0.0 --y 0.0 --z 0.0 --qx 0.5 --qy -0.5 --qz 0.5 --qw -0.5 --frame-id camera1/camera_link --child-frame-id camera1/camera_optical_link" />
-  <node pkg="tf2_ros" exec="static_transform_publisher" name="estimated_base_link_broadcaster" output="screen" args="--x 0.0 --y 0.0 --z 0.0 --qx 0.0 --qy 0.0 --qz 0.0 --qw 1.0 --frame-id lidar --child-frame-id camera0/camera_link" />
-  <node pkg="tf2_ros" exec="static_transform_publisher" name="estimated_base_link_broadcaster" output="screen" args="--x 0.0 --y 0.0 --z 0.0 --qx 0.0 --qy 0.0 --qz 0.0 --qw 1.0 --frame-id lidar --child-frame-id camera1/camera_link" />
 
   <!-- visuzalization -->
   <node pkg="rviz2" exec="rviz2" name="rviz2" output="screen" args="-d $(var rviz_profile)"/>
