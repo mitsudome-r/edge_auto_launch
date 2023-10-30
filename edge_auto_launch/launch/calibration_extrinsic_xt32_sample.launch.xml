@@ -2,14 +2,14 @@
   <!-- arguments -->
   <arg name="camera_name"/>
   <arg name="vehicle_id" default="$(env VEHICLE_ID default)"/>
-  <arg name="live_sensor" default="False"/>
+  <arg name="live_sensor" default="false"/>
 
   <!-- variables -->
   <let name="lidar_model" value="pandar_xt32"/>
   <let name="lidar_frame" value="hesai_top"/>
-  <let name="compressed_image_topic" value="/sensing/camera/camera4/image_rect_color/compressed"/>
+  <let name="compressed_image_topic" value="/sensing/camera/$(var camera_name)/image_rect_color/compressed"/>
   <let name="camera_info_topic" value="/sensing/camera/$(var camera_name)/camera_info"/>
-  <let name="pointcloud_topic" value="/sensing/lidar/xt32/aw_points"/>
+  <let name="pointcloud_topic" value="/sensing/lidar/top/pointcloud_raw"/>
   <let name="camera_frame" value="$(var camera_name)/camera_link"/>
 
   <let name="rviz_profile" value=""/>
@@ -26,8 +26,8 @@
     </include>
   </group>
 
-  <include file="$(find-pkg-share global_parameter_loader)/launch/set_use_sim_time.launch.py">
-    <arg name="use_sim_time" value="false"/>
+  <include file="$(find-pkg-share edge_auto_launch)/launch/component/set_use_sim_time.launch.py">
+    <arg name="use_sim_time" value="true"/>
     <!-- <arg name="vehicle_model" value="$(var vehicle_model)"/> -->
   </include>
 
@@ -48,7 +48,7 @@
     <!-- tag_based_calibrator -->
     <include file="$(find-pkg-share edge_auto_launch)/launch/component/extrinsic_tag_based_calibrator.launch.xml">
       <arg name="lidar_model" value="$(var lidar_model)"/>
-      <arg name="parent_frame" value="$(var lidar_frame)"/>
+      <arg name="parent_frame" value="sensor_kit_base_link"/>
       <arg name="child_frame" value="$(var camera_frame)"/>
       <arg name="camera_info_topic" value="$(var camera_info_topic)"/>
       <arg name="pointcloud_topic" value="$(var pointcloud_topic)"/>
